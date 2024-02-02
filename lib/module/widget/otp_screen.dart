@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:loginoption_forgetpassword/module/solution2/widget/white_container.dart';
+import 'package:loginoption_forgetpassword/module/widget/ui/white_container.dart';
 
 
 import 'package:sms_autofill/sms_autofill.dart';
 
 import '../utils/common_utils.dart';
-import 'border_box.dart';
+import 'ui/border_box.dart';
 import 'home_screen.dart';
 
 import 'package:permission_handler/permission_handler.dart';

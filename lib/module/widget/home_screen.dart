@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:loginoption_forgetpassword/module/login.dart';
+import 'package:loginoption_forgetpassword/module/widget/login/login.dart';
 
 
 import '../utils/common_utils.dart';
-import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

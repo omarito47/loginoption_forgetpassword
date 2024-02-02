@@ -1,16 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:loginoption_forgetpassword/module/forget_process_1.dart';
-import 'package:loginoption_forgetpassword/module/login.dart';
-import 'package:loginoption_forgetpassword/module/solution2/utils/common_utils.dart';
+import 'package:loginoption_forgetpassword/module/widget/password_process/forget_process_1.dart';
+import 'package:loginoption_forgetpassword/module/widget/login/login.dart';
+import 'package:loginoption_forgetpassword/module/utils/common_utils.dart';
 
 import 'package:otp_autofill/otp_autofill.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:intl/intl.dart';
 
-import '../main.dart';
+import '../../../main.dart';
 
 class SmsVerificationPage extends StatefulWidget {
   final String verifyId;

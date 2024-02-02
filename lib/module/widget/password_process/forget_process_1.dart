@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:loginoption_forgetpassword/module/forget_process_2.dart';
-import 'package:loginoption_forgetpassword/module/solution2/utils/common_utils.dart';
+import 'package:loginoption_forgetpassword/module/widget/password_process/forget_process_2.dart';
+import 'package:loginoption_forgetpassword/module/utils/common_utils.dart';
 
 import 'package:sms_autofill/sms_autofill.dart';
 

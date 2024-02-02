@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:loginoption_forgetpassword/module/login.dart';
-import 'package:loginoption_forgetpassword/module/qrcode.dart';
+import 'package:loginoption_forgetpassword/module/widget/login/login.dart';
+import 'package:loginoption_forgetpassword/module/widget/ui/qrcode.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:qr_flutter/qr_flutter.dart';

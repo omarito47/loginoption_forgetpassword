@@ -6,10 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:loginoption_forgetpassword/module/forget_process_1.dart';
-import 'package:loginoption_forgetpassword/module/profileInfo.dart';
-
-import 'controller/AuthService.dart';
+import 'package:loginoption_forgetpassword/module/widget/home_screen.dart';
+import 'package:loginoption_forgetpassword/module/widget/password_process/forget_process_1.dart';
+import 'package:loginoption_forgetpassword/module/widget/profileInfo.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -401,27 +400,6 @@ class _LoginPageState extends State<LoginPage> {
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          // if (_supportState == _SupportState.unknown)
-                          //   const CircularProgressIndicator()
-                          // else if (_supportState == _SupportState.supported)
-                          //   const Text('This device is supported')
-                          // else
-                          //   const Text('This device is not supported'),
-                          // const Divider(height: 100),
-                          // Text('Can check biometrics: $_canCheckBiometrics\n'),
-                          // ElevatedButton(
-                          //   onPressed: _checkBiometrics,
-                          //   child: const Text('Check biometrics'),
-                          // ),
-                          // const Divider(height: 100),
-                          // Text('Available biometrics: $_availableBiometrics\n'),
-                          // ElevatedButton(
-                          //   onPressed: _getAvailableBiometrics,
-                          //   child: const Text('Get available biometrics'),
-                          // ),
-                          // const Divider(height: 100),
-                          // Text('Current State: $_authorized\n'),
-
                           Row(
                             children: [
                               SizedBox(
@@ -453,6 +431,62 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.fingerprint,
+                                size: 50,
+                              ),
+                              Icon(
+                                Icons.tag_faces_sharp,
+                                size: 50,
+                              ),
+                              Icon(
+                                Icons.pin_outlined,
+                                size: 50,
+                              )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                minimumSize: const Size.fromHeight(50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                )),
+                            onPressed: () async {
+                              _authenticate().then((value) {
+                                if (_authorized == "Authorized") {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => HomeScreen(),
+                                      ));
+                                }
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: Text(
+                                      'Login with fingerPrint | faceId | Code Pin',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
                           ),
                           // ElevatedButton(
                           //   onPressed: () {
