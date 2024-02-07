@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:loginoption_forgetpassword/module/utils/user_auth/firebase_auth_services.dart';
 import 'package:loginoption_forgetpassword/module/widget/home_screen.dart';
 import 'package:loginoption_forgetpassword/module/widget/password_process/forget_process_1.dart';
 import 'package:loginoption_forgetpassword/module/widget/profileInfo.dart';
+import 'package:loginoption_forgetpassword/module/widget/sign_up/sign_up_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -38,6 +40,18 @@ class _LoginPageState extends State<LoginPage> {
         );
     _checkBiometrics();
     _getAvailableBiometrics();
+  }
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  bool isSigningUp = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkBiometrics() async {
@@ -73,6 +87,22 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _availableBiometrics = availableBiometrics;
       print("available biometrics ${_availableBiometrics}");
+    });
+  }
+
+  bool _isSigning = false;
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  Future<void> login() async {
+    FirebaseAuth.instance
+        .signInWithEmailAndPassword(
+            email: emailController.text, password: passwordController.text)
+        .then((value) {
+      print("-----------------------------------");
+      print("${value.additionalUserInfo}");
     });
   }
 
@@ -210,11 +240,10 @@ class _LoginPageState extends State<LoginPage> {
                         alignment: Alignment.topLeft,
                       ),
                       TextFormField(
+                        controller: _emailController,
                         validator: (value) {
                           if (value!.isEmpty) {
                             return "Please enter your email";
-                          } else if (value != "omartaamallah4@gmail.com") {
-                            return emailErrorMessage;
                           }
                         },
                         decoration: InputDecoration(
@@ -234,11 +263,10 @@ class _LoginPageState extends State<LoginPage> {
                         alignment: Alignment.topLeft,
                       ),
                       TextFormField(
+                        controller: _passwordController,
                         validator: (value) {
                           if (value!.isEmpty) {
                             return "Please enter your password";
-                          } else if (value != "1234") {
-                            return passwordErrorMessage;
                           }
                         },
                         decoration: InputDecoration(
@@ -288,7 +316,15 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         onPressed: () {
                           //forceCrash();
-                          validateForm();
+                          // validateForm();
+                          // if (emailController.text.isNotEmpty &&
+                          //     passwordController.text.length < 6) {
+                          //   login();
+                          // } else {
+                          //   debugPrint(
+                          //       "LOG: Email is empty or password is invalid - please try again");
+                          // }
+                          _signIn();
                         },
                         child: Text(
                           'Login',
@@ -488,28 +524,6 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          // ElevatedButton(
-                          //   onPressed: () {
-                          //     _authenticate().then((value) {
-                          //       if (_authorized == "Authorized") {
-                          //         Navigator.push(
-                          //             context,
-                          //             MaterialPageRoute(
-                          //               builder: (_) => HomeScreen(),
-                          //             ));
-                          //       }
-                          //     });
-                          //   },
-                          //   child: Row(
-                          //     mainAxisSize: MainAxisSize.min,
-                          //     children: <Widget>[
-                          //       Text('Login with '),
-                          //       const Icon(Icons.fingerprint),
-                          //       Text('or faceId '),
-                          //       const Icon(Icons.tag_faces_sharp)
-                          //     ],
-                          //   ),
-                          // ),
                         ],
                       )
                     ],
@@ -519,13 +533,34 @@ class _LoginPageState extends State<LoginPage> {
             ),
 
             // Second Tab: Sign Up
-            Center(
-              child: Text('Signup'),
-            ),
+           SignUpPage()
           ],
         ),
       ),
     );
+  }
+
+  void _signIn() async {
+    setState(() {
+      _isSigning = true;
+    });
+
+    String email = _emailController.text;
+    String password = _passwordController.text;
+    print("email = $email password= $password");
+
+    User? user = await _auth.signInWithEmailAndPassword(email, password).then((value) {print("user = $value");});
+    
+
+    setState(() {
+      _isSigning = false;
+    });
+   
+    if (user != null) {
+      showToast(message: "User is successfully signed in");
+    } else {
+      showToast(message: "some error occured");
+    }
   }
 }
 
