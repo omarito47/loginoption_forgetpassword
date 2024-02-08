@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "120588286240",
-    "project_id": "brpmob-686d5",
-    "storage_bucket": "brpmob-686d5.appspot.com"
+    "project_number": "382539502120",
+    "project_id": "fir-747ec",
+    "storage_bucket": "fir-747ec.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:120588286240:android:7381a2c8ca456a51b23f45",
+        "mobilesdk_app_id": "1:382539502120:android:f5d3070dd0888df1e5db1d",
+        "android_client_info": {
+          "package_name": "com.example.firebase_2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo6xb7bwnlwlOZcb5blIQkpoyzdbb27r8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382539502120:android:39415ff5b08c826fe5db1d",
         "android_client_info": {
           "package_name": "com.example.loginoption_forgetpassword"
         }
@@ -15,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC7UUO8wzwf3TXtblL29PqI1nqK3ucYSj8"
+          "current_key": "AIzaSyDo6xb7bwnlwlOZcb5blIQkpoyzdbb27r8"
         }
       ],
       "services": {
