@@ -5,7 +5,11 @@ import 'package:loginoption_forgetpassword/module/widget/login/login.dart';
 import '../utils/common_utils.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+   final String? phoneNumber;
+  final String email;
+  final String? DisplayName;
+  // final String? profilePicture;
+  const HomeScreen({Key? key,required  this.email,required this.DisplayName,required this.phoneNumber}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -30,6 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
               "Welcome user",
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22),
             ),
+            Text("Email : ${widget.email}"),
+
+            Text("Name : ${widget.DisplayName}"),
+            Text("PhoneNumber : ${widget.phoneNumber}"),
+            
+
             const SizedBox(
               height: 60,
             ),

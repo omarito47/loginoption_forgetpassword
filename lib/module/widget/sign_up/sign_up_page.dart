@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loginoption_forgetpassword/module/utils/user_auth/firebase_auth.dart';
 
 import 'package:loginoption_forgetpassword/module/utils/user_auth/firebase_auth_services.dart';
 import 'package:loginoption_forgetpassword/module/widget/login/login.dart';
@@ -13,11 +14,13 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final FirebaseAuthService _auth = FirebaseAuthService();
+  // final FirebaseAuthService _auth = FirebaseAuthService();
 
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+    TextEditingController _phoneNumberController = TextEditingController();
+
 
   bool isSigningUp = false;
 
@@ -66,10 +69,20 @@ class _SignUpPageState extends State<SignUpPage> {
               isPasswordField: true,
             ),
             SizedBox(
+              height: 10,
+            ),
+            FormContainerWidget(
+              controller: _phoneNumberController,
+              hintText: "PhoneNumber",
+              isPasswordField: false,
+            ),
+            SizedBox(
               height: 30,
             ),
             GestureDetector(
               onTap: () {
+                // FirebaseAuthService().signUpWithEmailAndPassword(
+                //     _emailController.text, _passwordController.text);
                 _signUp();
               },
               child: Container(
@@ -131,17 +144,19 @@ class _SignUpPageState extends State<SignUpPage> {
     String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
+    String phoneNumber = _phoneNumberController.text;
 
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+    User? user = await FirebaseAuthHelper.registerUsingEmailPassword(
+        name: username, email: email, password: password,phoneNumer: phoneNumber);
 
     setState(() {
       isSigningUp = false;
     });
     if (user != null) {
       showToast(message: "User is successfully created");
-      Navigator.pushNamed(context, "/home");
+      // Navigator.pushNamed(context, "/home");
     } else {
-      showToast(message: "Some error happend");
+      showToast(message: "Some error happend!!");
     }
   }
 }

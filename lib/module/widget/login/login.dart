@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:loginoption_forgetpassword/module/utils/user_auth/firebase_auth.dart';
 import 'package:loginoption_forgetpassword/module/utils/user_auth/firebase_auth_services.dart';
+import 'package:loginoption_forgetpassword/module/utils/user_auth/validator.dart';
 import 'package:loginoption_forgetpassword/module/widget/home_screen.dart';
 import 'package:loginoption_forgetpassword/module/widget/password_process/forget_process_1.dart';
 import 'package:loginoption_forgetpassword/module/widget/profileInfo.dart';
@@ -91,20 +94,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool _isSigning = false;
-  final FirebaseAuthService _auth = FirebaseAuthService();
+  // final FirebaseAuthService _auth = FirebaseAuthService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-
-  Future<void> login() async {
-    FirebaseAuth.instance
-        .signInWithEmailAndPassword(
-            email: emailController.text, password: passwordController.text)
-        .then((value) {
-      print("-----------------------------------");
-      print("${value.additionalUserInfo}");
-    });
-  }
 
   Future<void> _authenticate() async {
     bool authenticated = false;
@@ -138,6 +129,10 @@ class _LoginPageState extends State<LoginPage> {
         () => _authorized = authenticated ? 'Authorized' : 'Not Authorized');
   }
 
+  final _focusEmail = FocusNode();
+  final _focusPassword = FocusNode();
+
+  bool _isProcessing = false;
   Future<void> _authenticateWithBiometrics() async {
     bool authenticated = false;
     try {
@@ -205,6 +200,26 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<FirebaseApp> _initializeFirebase() async {
+    FirebaseApp firebaseApp = await Firebase.initializeApp();
+
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(
+            DisplayName: user.displayName,
+            email: user.email!,
+            phoneNumber: user.phoneNumber,
+          ),
+        ),
+      );
+    }
+
+    return firebaseApp;
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -227,313 +242,444 @@ class _LoginPageState extends State<LoginPage> {
         body: TabBarView(
           children: [
             // First Tab: Login
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(left: 5, bottom: 5),
-                        child: Text("Your email"),
-                        alignment: Alignment.topLeft,
-                      ),
-                      TextFormField(
-                        controller: _emailController,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "Please enter your email";
-                          }
-                        },
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          hintText: 'Enter your email',
-                        ),
-                        onSaved: (value) {
-                          email = value;
-                        },
-                      ),
-                      SizedBox(height: 16.0),
-                      Container(
-                        margin: EdgeInsets.only(left: 5, bottom: 5),
-                        child: Text("Password"),
-                        alignment: Alignment.topLeft,
-                      ),
-                      TextFormField(
-                        controller: _passwordController,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "Please enter your password";
-                          }
-                        },
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          hintText: 'Enter your password',
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.visibility),
-                            onPressed: () {},
-                          ),
-                        ),
-                        obscureText: true,
-                        onSaved: (value) {
-                          password = value;
-                        },
-                      ),
-                      SizedBox(height: 16.0),
-                      SizedBox(height: 16.0),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: TextButton(
-                          onPressed: () {
-                            // Navigate to forget password process1
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => forgetPwdPage1()),
-                            );
-                          },
-                          child: Text.rich(
-                            TextSpan(
-                              text: 'Forget Password? ',
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 124, 158, 220)),
-                            ),
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: Color(0xff648ddb),
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () {
-                          //forceCrash();
-                          // validateForm();
-                          // if (emailController.text.isNotEmpty &&
-                          //     passwordController.text.length < 6) {
-                          //   login();
-                          // } else {
-                          //   debugPrint(
-                          //       "LOG: Email is empty or password is invalid - please try again");
-                          // }
-                          _signIn();
-                        },
-                        child: Text(
-                          'Login',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      SizedBox(height: 16.0),
-                      Row(
-                        children: [
-                          SizedBox(
-                            height: 100,
-                          ),
-                          Flexible(
-                            child: Divider(
-                              indent: MediaQuery.of(context).size.width * .1,
-                              endIndent:
-                                  MediaQuery.of(context).size.width * .05,
-                              color: Color.fromARGB(255, 188, 188, 188),
-                              height: 10,
-                            ),
-                          ),
-                          Text(
-                            "or",
-                            style: TextStyle(
-                                color: Color.fromARGB(255, 188, 188, 188)),
-                          ),
-                          Flexible(
-                            child: Divider(
-                              indent: MediaQuery.of(context).size.width * .05,
-                              endIndent: MediaQuery.of(context).size.width * .1,
-                              color: Color.fromARGB(255, 188, 188, 188),
-                              height: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            )),
-                        onPressed: () async {
-                          final GoogleSignInAccount? gUser =
-                              await GoogleSignIn().signIn();
-
-                          final GoogleSignInAuthentication gAuth =
-                              await gUser!.authentication;
-                          final credential = GoogleAuthProvider.credential(
-                            accessToken: gAuth.accessToken,
-                            idToken: gAuth.idToken,
-                          );
-                          await FirebaseAuth.instance
-                              .signInWithCredential(credential)
-                              .then((value) {
-                            if (FirebaseAuth.instance.currentUser != null) {
-                              //create a logic if the email is omartaamallah4@gmail.com go to welcome screen if not go to welcomescreen withn the email the user will sign in with
-                              print(
-                                  "Info=====${FirebaseAuth.instance.currentUser!.email}");
-                              print(
-                                  "Info=====${FirebaseAuth.instance.currentUser!.displayName}");
-                              print(
-                                  "Info=====${FirebaseAuth.instance.currentUser!.phoneNumber}");
-                              print(
-                                  "Info=====${FirebaseAuth.instance.currentUser!.photoURL}");
-                              print(
-                                  "Info=====${FirebaseAuth.instance.currentUser!.metadata}");
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProfilePage(
-                                          email:
-                                              "${FirebaseAuth.instance.currentUser!.email}",
-                                          DisplayName:
-                                              "${FirebaseAuth.instance.currentUser!.displayName}",
-                                          profilePicture:
-                                              "${FirebaseAuth.instance.currentUser!.photoURL}",
-                                          phoneNumber:
-                                              "${FirebaseAuth.instance.currentUser!.phoneNumber}",
-                                        )),
-                              );
-                            }
-                          });
-                        },
+            GestureDetector(
+              onTap: () {
+                _focusEmail.unfocus();
+                _focusPassword.unfocus();
+              },
+              child: Scaffold(
+                body: FutureBuilder(
+                  future: _initializeFirebase(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return SingleChildScrollView(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Image(
-                                image: AssetImage("assets/google_logo.png"),
-                                height: 25.0,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: Text(
-                                  'Login with Google',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                      //finger print and faceId authentification
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Row(
+                          padding: const EdgeInsets.only(
+                              left: 24.0, right: 24.0, top: 48),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                height: 100,
-                              ),
-                              Flexible(
-                                child: Divider(
-                                  indent:
-                                      MediaQuery.of(context).size.width * .1,
-                                  endIndent:
-                                      MediaQuery.of(context).size.width * .05,
-                                  color: Color.fromARGB(255, 188, 188, 188),
-                                  height: 10,
-                                ),
-                              ),
-                              Text(
-                                "or",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 188, 188, 188)),
-                              ),
-                              Flexible(
-                                child: Divider(
-                                  indent:
-                                      MediaQuery.of(context).size.width * .05,
-                                  endIndent:
-                                      MediaQuery.of(context).size.width * .1,
-                                  color: Color.fromARGB(255, 188, 188, 188),
-                                  height: 10,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.fingerprint,
-                                size: 50,
-                              ),
-                              Icon(
-                                Icons.tag_faces_sharp,
-                                size: 50,
-                              ),
-                              Icon(
-                                Icons.pin_outlined,
-                                size: 50,
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                minimumSize: const Size.fromHeight(50),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                            onPressed: () async {
-                              _authenticate().then((value) {
-                                if (_authorized == "Authorized") {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => HomeScreen(),
-                                      ));
-                                }
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text(
-                                      'Login with fingerPrint | faceId | Code Pin',
-                                      style: TextStyle(
-                                        color: Colors.black,
+                              Form(
+                                key: _formKey,
+                                child: Column(
+                                  children: <Widget>[
+                                    Container(
+                                      margin:
+                                          EdgeInsets.only(left: 5, bottom: 5),
+                                      child: Text("Your email"),
+                                      alignment: Alignment.topLeft,
+                                    ),
+                                    TextFormField(
+                                      controller: _emailController,
+                                      focusNode: _focusEmail,
+                                      validator: (value) =>
+                                          Validator.validateEmail(
+                                        email: value,
+                                      ),
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        hintText: "Email",
+                                        errorBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6.0),
+                                          borderSide: BorderSide(
+                                            color: Colors.red,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  )
-                                ],
-                              ),
-                            ),
+                                    SizedBox(height: 8.0),
+                                    SizedBox(height: 16.0),
+                                    Container(
+                                      margin:
+                                          EdgeInsets.only(left: 5, bottom: 5),
+                                      child: Text("Password"),
+                                      alignment: Alignment.topLeft,
+                                    ),
+                                    TextFormField(
+                                      controller: _passwordController,
+                                      focusNode: _focusPassword,
+                                      obscureText: true,
+                                      validator: (value) =>
+                                          Validator.validatePassword(
+                                        password: value,
+                                      ),
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        hintText: "Password",
+                                        errorBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6.0),
+                                          borderSide: BorderSide(
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Align(
+                                      alignment: Alignment.topRight,
+                                      child: TextButton(
+                                        onPressed: () {
+                                          // Navigate to forget password process1
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    forgetPwdPage1()),
+                                          );
+                                        },
+                                        child: Text.rich(
+                                          TextSpan(
+                                            text: 'Forget Password? ',
+                                            style: TextStyle(
+                                                color: Color.fromARGB(
+                                                    255, 124, 158, 220)),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 24.0),
+                                    _isProcessing
+                                        ? CircularProgressIndicator()
+                                        : Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    primary: Color(0xff648ddb),
+                                                    minimumSize:
+                                                        const Size.fromHeight(
+                                                            50),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                    ),
+                                                  ),
+                                                  onPressed: () async {
+                                                    _focusEmail.unfocus();
+                                                    _focusPassword.unfocus();
+
+                                                    if (_formKey.currentState!
+                                                        .validate()) {
+                                                      setState(() {
+                                                        _isProcessing = true;
+                                                      });
+
+                                                      User? user =
+                                                          await FirebaseAuthHelper
+                                                              .signInUsingEmailPassword(
+                                                        email: _emailController
+                                                            .text,
+                                                        password:
+                                                            _passwordController
+                                                                .text,
+                                                      );
+
+                                                      setState(() {
+                                                        _isProcessing = false;
+                                                        print(
+                                                            "user info : ${user}");
+                                                      });
+
+                                                      if (user != null) {
+                                                        Navigator.of(context)
+                                                            .pushReplacement(
+                                                          MaterialPageRoute(
+                                                            builder:
+                                                                (context) =>
+                                                                    HomeScreen(
+                                                              DisplayName: user
+                                                                  .displayName,
+                                                              email:
+                                                                  user.email!,
+                                                              phoneNumber: user
+                                                                  .phoneNumber,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    'Sign In',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          height: 100,
+                                        ),
+                                        Flexible(
+                                          child: Divider(
+                                            indent: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                .1,
+                                            endIndent: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                .05,
+                                            color: Color.fromARGB(
+                                                255, 188, 188, 188),
+                                            height: 10,
+                                          ),
+                                        ),
+                                        Text(
+                                          "or",
+                                          style: TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 188, 188, 188)),
+                                        ),
+                                        Flexible(
+                                          child: Divider(
+                                            indent: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                .05,
+                                            endIndent: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                .1,
+                                            color: Color.fromARGB(
+                                                255, 188, 188, 188),
+                                            height: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          minimumSize:
+                                              const Size.fromHeight(50),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          )),
+                                      onPressed: () async {
+                                        final GoogleSignInAccount? gUser =
+                                            await GoogleSignIn().signIn();
+
+                                        final GoogleSignInAuthentication gAuth =
+                                            await gUser!.authentication;
+                                        final credential =
+                                            GoogleAuthProvider.credential(
+                                          accessToken: gAuth.accessToken,
+                                          idToken: gAuth.idToken,
+                                        );
+                                        await FirebaseAuth.instance
+                                            .signInWithCredential(credential)
+                                            .then((value) {
+                                          if (FirebaseAuth
+                                                  .instance.currentUser !=
+                                              null) {
+                                            //create a logic if the email is omartaamallah4@gmail.com go to welcome screen if not go to welcomescreen withn the email the user will sign in with
+                                            print(
+                                                "Info=====${FirebaseAuth.instance.currentUser!.email}");
+                                            print(
+                                                "Info=====${FirebaseAuth.instance.currentUser!.displayName}");
+                                            print(
+                                                "Info=====${FirebaseAuth.instance.currentUser!.phoneNumber}");
+                                            print(
+                                                "Info=====${FirebaseAuth.instance.currentUser!.photoURL}");
+                                            print(
+                                                "Info=====${FirebaseAuth.instance.currentUser!.metadata}");
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ProfilePage(
+                                                        email:
+                                                            "${FirebaseAuth.instance.currentUser!.email}",
+                                                        DisplayName:
+                                                            "${FirebaseAuth.instance.currentUser!.displayName}",
+                                                        profilePicture:
+                                                            "${FirebaseAuth.instance.currentUser!.photoURL}",
+                                                        phoneNumber:
+                                                            "${FirebaseAuth.instance.currentUser!.phoneNumber}",
+                                                      )),
+                                            );
+                                          }
+                                        });
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            0, 10, 0, 10),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Image(
+                                              image: AssetImage(
+                                                  "assets/google_logo.png"),
+                                              height: 25.0,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 5),
+                                              child: Text(
+                                                'Login with Google',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Row(
+                                          children: [
+                                            SizedBox(
+                                              height: 100,
+                                            ),
+                                            Flexible(
+                                              child: Divider(
+                                                indent: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    .1,
+                                                endIndent:
+                                                    MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        .05,
+                                                color: Color.fromARGB(
+                                                    255, 188, 188, 188),
+                                                height: 10,
+                                              ),
+                                            ),
+                                            Text(
+                                              "or",
+                                              style: TextStyle(
+                                                  color: Color.fromARGB(
+                                                      255, 188, 188, 188)),
+                                            ),
+                                            Flexible(
+                                              child: Divider(
+                                                indent: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    .05,
+                                                endIndent:
+                                                    MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        .1,
+                                                color: Color.fromARGB(
+                                                    255, 188, 188, 188),
+                                                height: 10,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.fingerprint,
+                                              size: 50,
+                                            ),
+                                            Icon(
+                                              Icons.tag_faces_sharp,
+                                              size: 50,
+                                            ),
+                                            Icon(
+                                              Icons.pin_outlined,
+                                              size: 50,
+                                            )
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              minimumSize:
+                                                  const Size.fromHeight(50),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              )),
+                                          onPressed: () async {
+                                            _authenticate().then((value) {
+                                              if (_authorized == "Authorized") {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => HomeScreen(
+                                                          DisplayName: "omar",
+                                                          email:
+                                                              "omar@omar.com",
+                                                          phoneNumber:
+                                                              "no phone number"),
+                                                    ));
+                                              }
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                0, 10, 0, 10),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 5),
+                                                  child: Text(
+                                                    'Login with fingerPrint | faceId | Code Pin',
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              )
+                            ],
                           ),
-                        ],
-                      )
-                    ],
-                  ),
+                        ),
+                      );
+                    }
+
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
                 ),
               ),
             ),
 
             // Second Tab: Sign Up
-           SignUpPage()
+            SignUpPage()
           ],
         ),
       ),
@@ -549,13 +695,16 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text;
     print("email = $email password= $password");
 
-    User? user = await _auth.signInWithEmailAndPassword(email, password).then((value) {print("user = $value");});
-    
+    User? user = await FirebaseAuthHelper.signInUsingEmailPassword(
+            email: email, password: password)
+        .then((value) {
+      print("user = $value");
+    });
 
     setState(() {
       _isSigning = false;
     });
-   
+
     if (user != null) {
       showToast(message: "User is successfully signed in");
     } else {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:loginoption_forgetpassword/module/widget/login/login.dart';
 import 'package:loginoption_forgetpassword/module/widget/ui/white_container.dart';
 
 
@@ -261,7 +262,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       isLoaded = false;
                     });
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => const HomeScreen()));
+                        builder: (context) =>  LoginPage()));
                   } catch (e) {
                     setState(() {
                       isLoaded = false;
