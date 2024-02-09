@@ -1,21 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:loginoption_forgetpassword/module/utils/services/firestore_service.dart';
 import 'package:loginoption_forgetpassword/module/widget/login/login.dart';
-
 
 import '../utils/common_utils.dart';
 
 class HomeScreen extends StatefulWidget {
-   final String? phoneNumber;
+  String? phoneNumber;
   final String email;
   final String? DisplayName;
   // final String? profilePicture;
-  const HomeScreen({Key? key,required  this.email,required this.DisplayName,required this.phoneNumber}) : super(key: key);
+  HomeScreen(
+      {Key? key,
+      required this.email,
+      required this.DisplayName,
+      required this.phoneNumber})
+      : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late Map<String, dynamic> dataFromFirestore;
+
+  Future<void> getphoneNumber() async {
+    await firestoreHandler()
+        .getDataFromFirestore(widget.DisplayName)
+        .then((value) {
+      dataFromFirestore = value[0] as Map<String, dynamic>;
+      setState(() {
+        widget.phoneNumber = dataFromFirestore["phoneNumber"];
+      });
+      print("valeur -------> ${dataFromFirestore["phoneNumber"]}");
+    });
+  }
+
+  @override
+  void initState() {
+    getphoneNumber();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,11 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22),
             ),
             Text("Email : ${widget.email}"),
-
             Text("Name : ${widget.DisplayName}"),
             Text("PhoneNumber : ${widget.phoneNumber}"),
-            
-
             const SizedBox(
               height: 60,
             ),

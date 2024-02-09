@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:loginoption_forgetpassword/module/utils/services/firestore_service.dart';
 import 'package:loginoption_forgetpassword/module/utils/user_auth/firebase_auth.dart';
 import 'package:loginoption_forgetpassword/module/utils/user_auth/firebase_auth_services.dart';
 import 'package:loginoption_forgetpassword/module/utils/user_auth/validator.dart';
@@ -220,6 +221,8 @@ class _LoginPageState extends State<LoginPage> {
     return firebaseApp;
   }
 
+  late Map<String, dynamic> dataFromFirestore;
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -391,8 +394,28 @@ class _LoginPageState extends State<LoginPage> {
                                                         print(
                                                             "user info : ${user}");
                                                       });
+                                                      String phoneNumber = "";
+
+                                                      await firestoreHandler()
+                                                          .getDataFromFirestore(
+                                                              user!.displayName)
+                                                          .then((value) {
+                                                        dataFromFirestore =
+                                                            value[0] as Map<
+                                                                String,
+                                                                dynamic>;
+                                                        setState(() {
+                                                          phoneNumber =
+                                                              dataFromFirestore[
+                                                                  "phoneNumber"];
+                                                        });
+                                                        print(
+                                                            "valeur -------> ${dataFromFirestore["phoneNumber"]}");
+                                                      });
 
                                                       if (user != null) {
+                                                        print(
+                                                            "value***${dataFromFirestore["phoneNumber"]}");
                                                         Navigator.of(context)
                                                             .pushReplacement(
                                                           MaterialPageRoute(
@@ -403,8 +426,9 @@ class _LoginPageState extends State<LoginPage> {
                                                                   .displayName,
                                                               email:
                                                                   user.email!,
-                                                              phoneNumber: user
-                                                                  .phoneNumber,
+                                                              phoneNumber:
+                                                                  dataFromFirestore[
+                                                                      "phoneNumber"],
                                                             ),
                                                           ),
                                                         );

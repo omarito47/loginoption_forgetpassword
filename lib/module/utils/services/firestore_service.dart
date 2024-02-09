@@ -3,17 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class firestoreHandler {
   // Function to save data to Firestore
   Future<void> saveDataToFirestore(
-      String collection, Map<String, dynamic> data, int index) async {
+      String collection, Map<String, dynamic> data) async {
     try {
-      await FirebaseFirestore.instance
-          .collection(collection)
-          .doc("user$index")
-          .set(data);
+      await FirebaseFirestore.instance.collection(collection).add(data);
       print('Data saved to Firestore successfully!');
     } catch (e) {
       print('Error saving data to Firestore: $e');
     }
   }
+
   //Function to delete collection from firestore
   Future<void> deleteCollection(String collectionName) async {
     var collectionRef = FirebaseFirestore.instance.collection(collectionName);
@@ -25,11 +23,12 @@ class firestoreHandler {
 
     print('Collection deleted: $collectionName');
   }
+
   // Function to get data from Firestore
-  Future<List<Object?>> getDataFromFirestore(String collection) async {
+  Future<List<Object?>> getDataFromFirestore(String? collection) async {
     try {
       QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection(collection).get();
+          await FirebaseFirestore.instance.collection(collection!).get();
 
       List<Object?> dataList = querySnapshot.docs
           .map((QueryDocumentSnapshot snapshot) => snapshot.data())
